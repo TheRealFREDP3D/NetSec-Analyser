@@ -1,0 +1,5 @@
+{
+  "name": "NetSec Recon Analyzer",
+  "description": "A cybersecurity dashboard for analyzing network reconnaissance logs and CTF outputs. Features AI-powered log explanation and status visualization.",
+  "requestFramePermissions": []
+}
