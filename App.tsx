@@ -1,46 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Terminal, Activity, Zap, FileText, ChevronRight, Shield, Globe, Lock } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Terminal, Activity, FileText, ChevronRight, Shield, Globe, Lock, Download, Upload } from 'lucide-react';
 import { TerminalView } from './components/TerminalView';
 import { AnalysisPanel } from './components/AnalysisPanel';
 import { analyzeLog } from './services/geminiService';
 import { AnalysisResult } from './types';
 
-// Default example log from the prompt
-const DEFAULT_LOG = `bash -lc "set -euo pipefail dig +short wrnmc.mil A wrnmc.mil AAAA || true printf \\"\\\\n# curl HEAD https://wrnmc.mil\\\\n\\" curl -sSvkI https://wrnmc.mil | sed -n '1,40p' || true printf \\"\\\\n# curl HEAD http://wrnmc.mil:443\\\\n\\" curl -sSvkI http://wrnmc.mil:443 | sed -n '1,60p' || true printf \\"\\\\n# openssl s_client\\\\n\\" printf \\"Q\\" | timeout 8 openssl s_client -connect wrnmc.mil:443 -servername wrnmc.mil 2>/dev/null | sed -n '1,80p' || true printf \\"\\\\n# nmap 443 service + ssl script\\\\n\\" timeout 25 nmap -Pn -p 443 -sV --script ssl-cert,ssl-enum-ciphers wrnmc.mil -oN /tmp/nmap_443.txt >/dev/null 2>&1 || true sed -n '1,160p' /tmp/nmap_443.txt || true"
-bash: line 2: dig: command not found
-
-# curl HEAD https://wrnmc.mil
-* Host wrnmc.mil:443 was resolved.
-* IPv6: (none)
-* IPv4: 10.96.144.223
-*   Trying 10.96.144.223:443...
-* connect to 10.96.144.223 port 443 from 10.0.47.66 port 46932 failed: Connection refused
-* Failed to connect to wrnmc.mil port 443 after 3 ms: Could not connect to server
-* closing connection #0
-curl: (7) Failed to connect to wrnmc.mil port 443 after 3 ms: Could not connect to server
-
-# curl HEAD http://wrnmc.mil:443
-* Host wrnmc.mil:443 was resolved.
-* IPv6: (none)
-* IPv4: 10.96.144.223
-*   Trying 10.96.144.223:443...
-* connect to 10.96.144.223 port 443 from 10.0.47.66 port 46946 failed: Connection refused
-* Failed to connect to wrnmc.mil port 443 after 1 ms: Could not connect to server
-* closing connection #0
-curl: (7) Failed to connect to wrnmc.mil port 443 after 1 ms: Could not connect to server
-
-# openssl s_client
-
-# nmap 443 service + ssl script
-# Nmap 7.95 scan initiated Mon Nov 24 11:12:40 2025 as: /usr/local/bin/nmap-bin -Pn -p 443 -sV --script ssl-cert,ssl-enum-ciphers -oN /tmp/nmap_443.txt wrnmc.mil
-Couldn't open a raw socket. Error: Operation not permitted (1)`;
-
 const App: React.FC = () => {
-  const [logContent, setLogContent] = useState(DEFAULT_LOG);
+  const [logContent, setLogContent] = useState('');
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'input' | 'analysis'>('input');
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAnalyze = async () => {
     setLoading(true);
@@ -60,6 +32,52 @@ const App: React.FC = () => {
     setLogContent('');
     setAnalysis(null);
     setActiveTab('input');
+  };
+
+  const handleSaveSession = () => {
+    const sessionData = {
+      version: '1.0',
+      timestamp: new Date().toISOString(),
+      logContent,
+      analysis
+    };
+    
+    const blob = new Blob([JSON.stringify(sessionData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `netsec-session-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleLoadSession = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const content = event.target?.result as string;
+        const session = JSON.parse(content);
+        
+        if (session.logContent !== undefined) setLogContent(session.logContent);
+        if (session.analysis !== undefined) {
+          setAnalysis(session.analysis);
+          if (session.analysis) {
+            setActiveTab('analysis');
+          } else {
+            setActiveTab('input');
+          }
+        }
+      } catch (err) {
+        setError('Invalid session file format');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // Reset input so the same file can be selected again
   };
 
   return (
@@ -88,35 +106,12 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-8">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-8 pb-32">
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* Sidebar / Controls */}
+          {/* Sidebar */}
           <div className="lg:col-span-3 space-y-6">
-            <div className="bg-[#161b22] border border-gray-800 rounded-xl p-5 shadow-sm">
-              <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <Zap className="w-4 h-4 text-yellow-400" />
-                Actions
-              </h2>
-              <div className="space-y-3">
-                <button
-                  onClick={handleAnalyze}
-                  disabled={loading || !logContent}
-                  className="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(0,191,255,0.2)]"
-                >
-                  {loading ? 'Processing...' : 'Analyze Log'}
-                  {!loading && <ChevronRight className="w-4 h-4" />}
-                </button>
-                <button
-                  onClick={clearLogs}
-                  className="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-2.5 px-4 rounded-lg transition-all border border-gray-700"
-                >
-                  Clear Session
-                </button>
-              </div>
-            </div>
-
             <div className="bg-[#161b22] border border-gray-800 rounded-xl p-5 shadow-sm">
               <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
                 <Globe className="w-4 h-4 text-purple-400" />
@@ -127,14 +122,42 @@ const App: React.FC = () => {
                   <span className="text-gray-500">Mode</span>
                   <span className="font-mono text-accent-green">RECON</span>
                 </div>
-                <div className="flex justify-between items-center pb-2 border-b border-gray-800">
-                  <span className="text-gray-500">Target Type</span>
-                  <span className="font-mono text-gray-300">MIL/GOV</span>
-                </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-500">Parser</span>
                   <span className="font-mono text-gray-300">GEMINI-2.5</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Session Management */}
+            <div className="bg-[#161b22] border border-gray-800 rounded-xl p-5 shadow-sm">
+              <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-accent-blue" />
+                Session
+              </h2>
+              <div className="space-y-3">
+                <button 
+                  onClick={handleSaveSession}
+                  disabled={!logContent && !analysis}
+                  className="w-full flex items-center gap-3 px-4 py-2 bg-gray-800 hover:bg-gray-750 text-gray-300 rounded-lg transition-colors text-sm border border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed group"
+                >
+                  <Download className="w-4 h-4 group-hover:text-accent-blue transition-colors" />
+                  Save to File
+                </button>
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full flex items-center gap-3 px-4 py-2 bg-gray-800 hover:bg-gray-750 text-gray-300 rounded-lg transition-colors text-sm border border-gray-700 group"
+                >
+                  <Upload className="w-4 h-4 group-hover:text-accent-green transition-colors" />
+                  Load from File
+                </button>
+                <input 
+                  type="file" 
+                  ref={fileInputRef}
+                  onChange={handleLoadSession}
+                  className="hidden"
+                  accept=".json"
+                />
               </div>
             </div>
           </div>
@@ -215,6 +238,26 @@ const App: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Actions Footer */}
+      <div className="border-t border-gray-800 bg-[#161b22] p-4 sticky bottom-0 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-end gap-4">
+           <button
+             onClick={clearLogs}
+             className="bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-2.5 px-6 rounded-lg transition-all border border-gray-700"
+           >
+             Clear Session
+           </button>
+           <button
+             onClick={handleAnalyze}
+             disabled={loading || !logContent}
+             className="bg-accent-blue hover:bg-blue-600 text-white font-medium py-2.5 px-6 rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(0,191,255,0.2)]"
+           >
+             {loading ? 'Processing...' : 'Analyze Log'}
+             {!loading && <ChevronRight className="w-4 h-4" />}
+           </button>
+        </div>
+      </div>
     </div>
   );
 };
