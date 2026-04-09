@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal, Activity, FileText, ChevronRight, Shield, Globe, Lock, Download, Upload, Settings } from 'lucide-react';
+import { Terminal, Activity, FileText, Shield, Lock, Download, Upload, Settings, ChevronRight } from 'lucide-react';
 import { TerminalView } from './components/TerminalView';
 import { AnalysisPanel } from './components/AnalysisPanel';
 import { analyzeLog, fetchGeminiModels, fetchOllamaModels, fetchOpenAIModels } from './services/llmService';
@@ -49,21 +49,20 @@ const App: React.FC = () => {
 
           setAvailableModels(allModels);
 
-          // Set default selected model (prefer Gemini, fallback to OpenAI, then Ollama, then first available)
+          // Set default selected model only if none is already selected (prefer Gemini, fallback to OpenAI, then Ollama, then first available)
           const defaultGeminiModel = gemini[0];
           const defaultOpenAIModel = openai[0];
           const defaultOllamaModel = ollama[0];
           const firstAvailableModel = allModels[0];
           
-          if (defaultGeminiModel) {
-            setSelectedModel(defaultGeminiModel);
-          } else if (defaultOpenAIModel) {
-            setSelectedModel(defaultOpenAIModel);
-          } else if (defaultOllamaModel) {
-            setSelectedModel(defaultOllamaModel);
-          } else if (firstAvailableModel) {
-            setSelectedModel(firstAvailableModel);
-          }
+          setSelectedModel(prev => {
+            if (prev) return prev; // Keep existing selection
+            
+            if (defaultGeminiModel) return defaultGeminiModel;
+            if (defaultOpenAIModel) return defaultOpenAIModel;
+            if (defaultOllamaModel) return defaultOllamaModel;
+            return firstAvailableModel;
+          });
         }
       } catch (err) {
         if (!abortController.signal.aborted) {

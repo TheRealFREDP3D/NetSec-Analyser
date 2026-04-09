@@ -34,7 +34,7 @@ A powerful web-based tool for analyzing network security logs and reconnaissance
 ## Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 20+ 
 - npm, yarn, or pnpm
 
 ### Installation
@@ -68,7 +68,7 @@ VITE_GEMINI_API_KEY=your_gemini_api_key_here
 VITE_OPENAI_API_KEY=your_openai_api_key_here
 
 # For Ollama (optional - local instance)
-VITE_OLLAMA_URL=http://localhost:11434
+VITE_OLLAMA_BASE_URL=http://localhost:11434
 ```
 
 5. Start the development server:
@@ -174,7 +174,7 @@ The build will be optimized and ready for deployment to any static hosting servi
 |----------|----------|-------------|
 | `VITE_GEMINI_API_KEY` | No | Google Gemini API key |
 | `VITE_OPENAI_API_KEY` | No | OpenAI API key |
-| `VITE_OLLAMA_URL` | No | Ollama server URL (default: http://localhost:11434) |
+| `VITE_OLLAMA_BASE_URL` | No | Ollama server URL (default: http://localhost:11434) |
 
 ## Troubleshooting
 

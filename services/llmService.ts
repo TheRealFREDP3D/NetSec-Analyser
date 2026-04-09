@@ -22,7 +22,8 @@ const createAPIError = (provider: string, message: string, statusCode?: number, 
 
 
 export const fetchOllamaModels = async (): Promise<LLMModel[]> => {
-  const ollamaBaseUrl = import.meta.env.VITE_OLLAMA_BASE_URL || 'http://localhost:11434';
+  // Support both variable names for backward compatibility
+  const ollamaBaseUrl = import.meta.env.VITE_OLLAMA_BASE_URL || import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434';
 
   try {
     const response = await fetch(`${ollamaBaseUrl}/api/tags`);
@@ -79,8 +80,6 @@ export const fetchOpenAIModels = async (): Promise<LLMModel[]> => {
   }
 
   try {
-    const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
-    
     // Fetch available models directly from OpenAI API
     const response = await fetch('https://api.openai.com/v1/models', {
       headers: {
@@ -331,7 +330,8 @@ async function analyzeWithOpenAI(prompt: string, modelId: string): Promise<Analy
 
 
 async function analyzeWithOllama(prompt: string, modelId: string): Promise<AnalysisResult> {
-  const ollamaBaseUrl = import.meta.env.VITE_OLLAMA_BASE_URL || 'http://localhost:11434';
+  // Support both variable names for backward compatibility
+  const ollamaBaseUrl = import.meta.env.VITE_OLLAMA_BASE_URL || import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434';
 
   try {
     const response = await fetch(`${ollamaBaseUrl}/api/generate`, {
@@ -450,7 +450,8 @@ async function generateTitleWithOpenAI(prompt: string, modelId: string): Promise
 }
 
 async function generateTitleWithOllama(prompt: string, modelId: string): Promise<string> {
-  const ollamaBaseUrl = import.meta.env.VITE_OLLAMA_BASE_URL || 'http://localhost:11434';
+  // Support both variable names for backward compatibility
+  const ollamaBaseUrl = import.meta.env.VITE_OLLAMA_BASE_URL || import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434';
 
   try {
     const response = await fetch(`${ollamaBaseUrl}/api/generate`, {
