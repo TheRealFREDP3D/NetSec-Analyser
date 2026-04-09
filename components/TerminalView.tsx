@@ -103,11 +103,11 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ content }) => {
           const hasBorder = style.bg.includes('border-l-2');
           
           return (
-            <div key={idx} className={`flex items-start gap-3 py-1 pr-2 ${style.bg} transition-colors min-h-[1.5rem]`}>
-              <span className={`text-gray-700 select-none w-8 text-right shrink-0 text-xs pt-0.5 font-mono opacity-50 ${hasBorder ? 'pl-0' : 'pl-0.5'}`}>{idx + 1}</span>
-              <div className="flex items-start gap-2 flex-1 min-w-0">
+            <div key={idx} className={`flex items-start py-1 pr-2 ${style.bg} transition-colors min-h-[1.5rem]`}>
+              <span className="text-gray-700 select-none w-8 text-right shrink-0 text-xs pt-0.5 font-mono opacity-50">{idx + 1}</span>
+              <div className="flex items-start gap-2 flex-1 min-w-0 ml-3">
                  {style.icon && <span className="shrink-0 opacity-80 mt-0.5">{style.icon}</span>}
-                 <span className={`${style.text} whitespace-pre-wrap break-all leading-tight`}>{line}</span>
+                 <span className={`${style.text} whitespace-pre-wrap break-all leading-tight flex-1`}>{line}</span>
               </div>
             </div>
           );

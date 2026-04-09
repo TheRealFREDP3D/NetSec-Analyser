@@ -1,23 +1,53 @@
 {
-  "name": "netsec-recon-analyzer",
-  "private": true,
-  "version": "0.0.0",
+  "name": "netsec-analyzer",
+  "version": "0.1.0",
+  "description": "AI-powered network security log analyzer for CTF and reconnaissance tasks",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "type-check": "tsc --noEmit"
   },
+  "keywords": [
+    "network-security",
+    "cybersecurity",
+    "ctf",
+    "reconnaissance",
+    "log-analysis",
+    "ai",
+    "gemini",
+    "openai",
+    "ollama",
+    "penetration-testing",
+    "security-tools"
+  ],
+  "author": "Frederick Pellerin-fredp3d@proton.me",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/therealfredp3d/NetSec-Analyser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/therealfredp3d/NetSec-Analyser/issues"
+  },
+  "homepage": "https://github.com/therealfredp3d/NetSec-Analyser#readme",
   "dependencies": {
-    "react-dom": "^19.2.0",
-    "react": "^19.2.0",
-    "@google/genai": "^1.30.0",
-    "lucide-react": "^0.554.0"
+    "@google/genai": "^1.48.0",
+    "lucide-react": "^0.554.0",
+    "openai": "^6.33.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }
