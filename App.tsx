@@ -39,13 +39,9 @@ const App: React.FC = () => {
 
         // Check if component is still mounted before updating state
         if (!abortController.signal.aborted) {
-          // Combine fetched models with static models for other providers
-          const staticModels = AVAILABLE_MODELS.filter(model => 
-            model.provider !== LLMProvider.GEMINI && 
-            model.provider !== LLMProvider.OPENAI && 
-            model.provider !== LLMProvider.OLLAMA
-          );
-          const allModels = [...gemini, ...openai, ...ollama, ...staticModels];
+          // Combine fetched models (including fallbacks when API calls fail)
+          // No need to filter static models since the service functions return fallback models when API calls fail
+          const allModels = [...gemini, ...openai, ...ollama];
 
           setAvailableModels(allModels);
 
@@ -258,16 +254,12 @@ const App: React.FC = () => {
                 }}
                 className="w-full bg-gray-800 border border-gray-700 text-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue focus:border-accent-blue"
               >
-                {selectedModel 
-                  ? availableModels
-                      .filter(model => model.provider === selectedModel.provider)
-                      .map(model => (
-                        <option key={model.id} value={model.id}>
-                          {model.name}
-                        </option>
-                      ))
-                  : <option value="">Select a provider first</option>
-                }
+                <option value="">Select a model...</option>
+                {availableModels.map(model => (
+                  <option key={model.id} value={model.id}>
+                    {model.name} ({model.provider})
+                  </option>
+                ))}
               </select>
             </div>
 
