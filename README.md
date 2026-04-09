@@ -41,7 +41,7 @@ A powerful web-based tool for analyzing network security logs and reconnaissance
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-username/NetSec-Analyser.git
+git clone https://github.com/therealfredp3d/NetSec-Analyser.git
 cd NetSec-Analyser
 ```
 
