@@ -196,7 +196,7 @@ The build will be optimized and ready for deployment to any static hosting servi
 - Verify all dependencies are installed
 
 ### Getting Help
-- Check the [Issues](https://github.com/your-username/NetSec-Analyser/issues) page
+- Check the [Issues](https://github.com/therealfredp3d/NetSec-Analyser/issues) page
 - Review existing bug reports and feature requests
 - Create a new issue with detailed information
 
